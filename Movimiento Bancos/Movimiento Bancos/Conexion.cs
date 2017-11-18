@@ -5,13 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data;
 using MySql.Data.MySqlClient;
-//using System.Data.Odbc;
+using System.Data.Odbc;
 
 namespace Movimiento_Bancos
 {
     class Conexion
     {
-        private MySqlConnection conn;
+        private OdbcConnection conn;
         private String connStr;
 
         /*Create a constructor*/
@@ -26,7 +26,7 @@ namespace Movimiento_Bancos
         {
             try
             {
-                conn = new MySqlConnection(connStr);
+                conn = new OdbcConnection(connStr);
                 conn.Open();
                 return true;
             }
@@ -46,7 +46,7 @@ namespace Movimiento_Bancos
                     conn.Close();
                 return true;
             }
-            catch (MySqlException ex)
+            catch (OdbcException ex)
             {
                 return false;
             }
@@ -55,7 +55,7 @@ namespace Movimiento_Bancos
         public DataTable llenarDataGridView(String sentencia)
         {
             DataTable dt = new DataTable();
-            MySqlDataAdapter da = new MySqlDataAdapter(sentencia, connStr);
+            OdbcDataAdapter da = new OdbcDataAdapter(sentencia, connStr);
             da.Fill(dt);
             return dt;
         }
@@ -63,7 +63,7 @@ namespace Movimiento_Bancos
         public void InsertarRegistro(String sentencia)
         {
             string insertquery = sentencia;
-            MySqlCommand command = new MySqlCommand(insertquery, conn);
+            OdbcCommand command = new OdbcCommand(insertquery, conn);
             command.ExecuteNonQuery();
         }
     }
