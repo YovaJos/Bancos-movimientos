@@ -13,25 +13,46 @@ namespace Navegador
 {
     public partial class Navegador : UserControl
     {
+
+        /**
+         * Parametros user control necesarios para una conexion a base de datos MYSQL
+         * 
+         * **/
+
         [Description("Direccion servidor")]
         [Category("ParametrosBD")]
-        public String servidor{ get; set; }
+        public String sServidor{ get; set; }
         [Description("BaseDatos")]
         [Category("ParametrosBD")]
-        public String nombreBD { get; set; }
+        public String sNombreBD { get; set; }
         [Description("NombreTabla")]
         [Category("ParametrosBD")]
-        public String nombreTabla { get; set; }
+        public String sNombreTabla { get; set; }
         [Description("Usuario")]
         [Category("ParametrosBD")]
-        public String usuario { get; set; }
+        public String sUsuario { get; set; }
         [Description("Contraseña")]
         [Category("ParametrosBD")]
-        public String pass { get; set; }
-        
+        public String sPass { get; set; }
         private Conector con;
-        public int iPosicion = 0,iFilastotal;
-        public String result { get; set; }
+        public int iPosicion = 0,iFilastotal,iColumnasTotal;
+        public String sResult { get; set; }
+
+
+        /**
+         * 
+         * Eventos que reciben los metodos o funciones para ser aplicados a cada boton
+         * 
+         * **/
+        public event EventHandler RecibidorInsertar;
+        public event EventHandler RecibidorActualizar;
+        public event EventHandler RecibidorEliminar;
+        public event EventHandler RecibidorSiguiente;
+        public event EventHandler RecibidorAnterior;
+        public event EventHandler RecibidorPrimero;
+        public event EventHandler RecibidorUltimo;
+        
+
 
         public Navegador()
         {
@@ -69,8 +90,8 @@ namespace Navegador
 
         private void panel1_MouseClick(object sender, MouseEventArgs e)
         {
-            if (this.InsertReceive != null)
-                this.InsertReceive(this, e);
+            if (this.RecibidorInsertar != null)
+                this.RecibidorInsertar(this, e);
 
         }
 
@@ -84,10 +105,6 @@ namespace Navegador
 
         }
 
-        public event EventHandler InsertReceive;
-        public event EventHandler UpdateReceive;
-        public event EventHandler DeleteReceive;
-
         private void label8_Click(object sender, EventArgs e)
         {
 
@@ -100,8 +117,8 @@ namespace Navegador
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (this.UpdateReceive != null)
-                this.UpdateReceive(this, e);
+            if (this.RecibidorActualizar != null)
+                this.RecibidorActualizar(this, e);
         }
 
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
@@ -111,8 +128,8 @@ namespace Navegador
 
         private void button3_Click(object sender, EventArgs e)
         {
-            if (this.DeleteReceive != null)
-                this.DeleteReceive(this, e);
+            if (this.RecibidorEliminar != null)
+                this.RecibidorEliminar(this, e);
         }
 
         private void button8_Click(object sender, EventArgs e)
@@ -126,30 +143,42 @@ namespace Navegador
                 iPosicion--;
             }
             getDatoManipulable(iPosicion);
+            if (this.RecibidorAnterior != null)
+                this.RecibidorAnterior(this, e);
         }
 
         private void button10_Click(object sender, EventArgs e)
         {
-            iPosicion = 0;
+            iPosicion = iFilastotal - 1;
             getDatoManipulable(iPosicion);
+            if (this.RecibidorUltimo != null)
+                this.RecibidorUltimo(this, e);
         }
 
         public void getDatoManipulable(int posicion) {
             String resultado = "";
-            con = new Conector(servidor,nombreBD,usuario,pass);
+            con = new Conector(sServidor,sNombreBD,sUsuario,sPass);
             con.OpenConnection();
-            DataTable res = con.informacion("Select * FROM " + nombreTabla);
+            DataTable res = con.informacion("Select * FROM " + sNombreTabla);
             DataSet data = new DataSet("NAV");
             data.Tables.Add(res);
-            resultado = data.Tables[0].Rows[iPosicion][1].ToString();
+            iFilastotal = data.Tables[0].Rows.Count;
+            iColumnasTotal = data.Tables[0].Columns.Count;
+            for (int i = 0; i < iColumnasTotal; i++)
+            {
+                resultado += data.Tables[0].Rows[iPosicion][i].ToString();
+            }
             MessageBox.Show("Dato : " + resultado);
-            this.result = resultado;
+            this.sResult = resultado;
         }
 
         private void button11_Click(object sender, EventArgs e)
         {
             iPosicion++;
             getDatoManipulable(iPosicion);
+            if (this.RecibidorSiguiente != null)
+                this.RecibidorSiguiente(this, e);
+
         }
 
         private void button1_MouseEnter(object sender, EventArgs e)
@@ -159,8 +188,8 @@ namespace Navegador
 
         private void button6_Click(object sender, EventArgs e)
         {
-            if (this.InsertReceive != null)
-                this.InsertReceive(this, e);
+            if (this.RecibidorInsertar != null)
+                this.RecibidorInsertar(this, e);
         }
 
         private void button5_Click(object sender, EventArgs e)
@@ -177,6 +206,8 @@ namespace Navegador
         {
             iPosicion = iFilastotal - 1;
             getDatoManipulable(iPosicion);
+            if (this.RecibidorPrimero != null)
+                this.RecibidorPrimero(this, e);
         }
 
         private void btn_actualizar_Click(object sender, EventArgs e)
